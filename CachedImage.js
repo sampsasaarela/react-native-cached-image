@@ -44,6 +44,8 @@ const CACHED_IMAGE_REF = 'cachedImage';
 
 class CachedImage extends React.Component {
 
+    refs = {};
+
     static propTypes = {
         renderImage: PropTypes.func.isRequired,
         activityIndicatorProps: PropTypes.object.isRequired,
