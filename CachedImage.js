@@ -40,14 +40,12 @@ function getImageProps(props) {
     return _.omit(props, ['source', 'defaultSource', 'fallbackSource', 'LoadingIndicator', 'activityIndicatorProps', 'style', 'useQueryParamsInCacheKey', 'renderImage', 'resolveHeaders']);
 }
 
-const CACHED_IMAGE_REF = 'cachedImage';
-
 class CachedImage extends React.Component {
 
-    refs = {};
+    imageRef = null;
 
     static propTypes = {
-        renderImage: PropTypes.func.isRequired,
+        renderImage: PropTypes.func,
         activityIndicatorProps: PropTypes.object.isRequired,
 
         // ImageCacheManager options
@@ -55,7 +53,6 @@ class CachedImage extends React.Component {
     };
 
     static defaultProps = {
-            renderImage: props => (<ImageBackground imageStyle={props.style} ref={(ref) => { this.refs[CACHED_IMAGE_REF] = ref; }} {...props} />),
             activityIndicatorProps: {},
     };
 
@@ -108,9 +105,19 @@ class CachedImage extends React.Component {
         }
     }
 
+    renderImage(props) {
+      if (this.props.renderImage) {
+        return this.props.renderImage(props);
+      }
+
+      return (<ImageBackground imageStyle={props.style} ref={(ref) => { this.imageRef = ref; }} {...props} />);
+    }
+
     setNativeProps(nativeProps) {
         try {
-            this.refs[CACHED_IMAGE_REF].setNativeProps(nativeProps);
+            if (this.imageRef) {
+              this.imageRef.setNativeProps(nativeProps);
+            }
         } catch (e) {
             console.error(e);
         }
@@ -173,14 +180,14 @@ class CachedImage extends React.Component {
             uri: 'file://' + this.state.cachedImagePath
         } : this.props.source;
         if (this.props.fallbackSource && !this.state.cachedImagePath) {
-            return this.props.renderImage({
+            return this.renderImage({
                 ...props,
                 key: `${props.key || source.uri}error`,
                 style,
                 source: this.props.fallbackSource
             });
         }
-        return this.props.renderImage({
+        return this.renderImage({
             ...props,
             key: props.key || source.uri,
             style,
@@ -216,7 +223,7 @@ class CachedImage extends React.Component {
             );
         }
         // otherwise render an image with the defaultSource with the ActivityIndicator on top of it
-        return this.props.renderImage({
+        return this.renderImage({
             ...imageProps,
             style: imageStyle,
             key: source.uri,
