@@ -53,7 +53,7 @@ class CachedImage extends React.Component {
     };
 
     static defaultProps = {
-            renderImage: props => (<ImageBackground imageStyle={props.style} ref={CACHED_IMAGE_REF} {...props} />),
+            renderImage: props => (<ImageBackground imageStyle={props.style} ref={(ref) => { this.refs[CACHED_IMAGE_REF] = ref; }} {...props} />),
             activityIndicatorProps: {},
     };
 
